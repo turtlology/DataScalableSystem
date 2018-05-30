@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/turtlology/DataScalableSystem/issues"
   },
-  "homepage": "https://github.com/turtlology/DataScalableSystem#readme"
+  "homepage": "https://github.com/turtlology/DataScalableSystem#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
 }
