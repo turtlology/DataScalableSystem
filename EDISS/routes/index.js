@@ -9,15 +9,16 @@ var session = require('express-session');
 var FileStore = require('session-file-store')(session);
 
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('DataScalableSystem', 'root', 'root', {
+const sequelize = new Sequelize('DataScalableSystem', 'root', 'root1234', {
 	host: 'ediss.cyfeqjhd9zxr.us-east-1.rds.amazonaws.com',
 	dialect: 'mysql',
 
 	pool: {
 		max: 5,
 		min: 0,
-		acquire: 30000,
-		idle: 10000
+		acquire: 10000,
+		idle: 10000,
+		evict: 10000
 	},
 
 	operatorsAliases: false
