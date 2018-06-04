@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express();
+var router = express.Router();
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.json());
@@ -9,7 +10,7 @@ var FileStore = require('session-file-store')(session);
 
 const Sequelize = require('sequelize');
 const sequelize = new Sequelize('DataScalableSystem', 'root', 'root', {
-	host: 'localhost',
+	host: 'ediss.cyfeqjhd9zxr.us-east-1.rds.amazonaws.com',
 	dialect: 'mysql',
 
 	pool: {
@@ -191,3 +192,4 @@ function isLogIn(req){
 }
 
 app.listen(4000);
+module.exports = router;
