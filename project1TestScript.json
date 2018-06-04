@@ -1,62 +1,64 @@
 {
   "config": {
-    "target": "http://localhost:4000",
+    "target": "http://54.87.128.172:4000",
     "phases": [
-      {"duration": 10, "arrivalCount": 1}
+      {"duration": 1, "arrivalCount": 1}
     ]
   },
   "scenarios": [
+
     {
-      "name": "Basic tests for project 1",
+      "name": "Without login",
       "flow": [
         {"post": {
           "url": "/login",
-          "json": {"username":"hsmith","password":"smith"},
+          "json": {"username":"tbucktoo","password":"bucktoo"},
           "match":{
             "json":"$.message",
-            "value":"Welcome Henry"
+            "value":"Welcome Tim"
           }
-         }
-       },
-       {"post": {
-         "url": "/add",
-         "json": {"num1":4,"num2":9},
-         "match":[
-		   {
-             "json":"$.message",
-             "value":"The action was successful"
-           },
-           {
-             "json":"$.result",
-             "value":13
-           }
-		 ]
         }
-      },
-      {"post": {
-        "url": "/divide",
-        "json": {"num1":8,"num2":2},
-        "match":[
-		  {
+        },
+        {"post": {
+          "url": "/logout",
+          "match":{
             "json":"$.message",
-            "value":"The action was successful"
-          },
-          {
-            "json":"$.result",
-            "value":4
+            "value":"You have been successfully logged out"
           }
-		]
-       }
-      },
-      {"post": {
-        "url": "/logout",
-        "match":{
-          "json":"$.message",
-          "value":"You have been successfully logged out"
         }
-       }
-      }
-     ]
+        },
+        {"post": {
+          "url": "/add",
+          "json": {"num1":4,"num2":9},
+          "match":[
+            {
+              "json":"$.message",
+              "value":"You are not currently logged in"
+            }
+          ]
+        }
+        },
+        {"post": {
+          "url": "/divide",
+          "json": {"num1":8,"num2":2},
+          "match":[
+            {
+              "json":"$.message",
+              "value":"You are not currently logged in"
+            }
+          ]
+        }
+        },
+        {"post": {
+          "url": "/logout",
+          "match":{
+            "json":"$.message",
+            "value":"You are not currently logged in"
+          }
+        }
+        }
+      ]
     }
+
   ]
 }

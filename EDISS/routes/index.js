@@ -136,7 +136,7 @@ app.post('/add', function(req, res){
 	}
 });
 
-app.post('/multiple', function(req, res){
+app.post('/multiply', function(req, res){
 	//console.log("here is multiple");
 	if (!isLogIn(req)){
 		res.json({"message":"You are not currently logged in"});
