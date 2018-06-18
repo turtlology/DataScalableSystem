@@ -2,7 +2,7 @@
 const Sequelize = require('sequelize');
 
 const sequelize = new Sequelize('DataScalableSystem', 'root', 'root', {
-    host: 'localhost',
+    host: 'ediss.cyfeqjhd9zxr.us-east-1.rds.amazonaws.com',
     dialect: 'mysql',
 
     pool: {
