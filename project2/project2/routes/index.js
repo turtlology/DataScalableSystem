@@ -288,7 +288,7 @@ router.post('/viewUsers', function(req, res){
       return res.json({"message":"The action was successful", "user":users});
     }
     else {
-      return res.json({"message": "There are no products that match that criteria"})
+      return res.json({"message": "There are no users that match that criteria"})
     }
   });
 });
