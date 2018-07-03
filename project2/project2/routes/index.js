@@ -26,7 +26,13 @@ var identityKey = 'skey';
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
+  res.end();
 });
+
+router.get('/check', function(req, res){
+  res.writeHeader(200);
+
+})
 
 router.post('/registerUser', function(req, res, next) {
   if (req.body){
