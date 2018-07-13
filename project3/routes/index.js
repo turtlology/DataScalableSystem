@@ -500,7 +500,15 @@ router.post('/getRecommendations', function(req, res){
     group: "two",
     order: [[Sequelize.fn('COUNT', Sequelize.col('two')), 'DESC']]
   }).then(function(products){
-    return res.json({"message": "The action was successful", "products":products});
+    console.log(products);
+    if (products.length == 0){
+      res.json({"message": "There are no recommendations for that product"});
+      return;
+    } else {
+      res.json({"message": "The action was successful", "products":products});
+      return;
+    }
+
   });
 });
 
