@@ -39,7 +39,7 @@
         }
         },
         {"post": {
-          "url": "/divide",
+          "url": "/multiply",
           "json": {"num1":8,"num2":2},
           "match":[
             {

@@ -9,8 +9,9 @@ var session = require('express-session');
 var FileStore = require('session-file-store')(session);
 
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('DataScalableSystem', 'root', 'root1234', {
-	host: 'ediss.cyfeqjhd9zxr.us-east-1.rds.amazonaws.com',
+const sequelize = new Sequelize('DataScalableSystemProject1', 'root', 'root', {
+	//host: 'ediss.cyfeqjhd9zxr.us-east-1.rds.amazonaws.com',
+	host: 'localhost',
 	dialect: 'mysql',
 
 	pool: {
@@ -89,6 +90,7 @@ app.post('/login', function(req, res){
 					password: req.body.password
 				}
 			});
+			console.log(user);
 			if (user){
 				req.session.regenerate(function(err) {
 					req.session.loginUser = user.get('name');
