@@ -6,6 +6,8 @@ var Product = require('../Module/Product');
 var Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 var identityKey = 'skey';
+var History = require('../Module/History');
+var Reciept = require('../Module/Reciept');
 
 //const Sequelize = require('sequelize');
 //const sequelize = new Sequelize('DataScalableSystem', 'root', 'root', {
@@ -82,8 +84,71 @@ router.get('/start', function(req, res){
     });
   });
 
+  History.sync({force: true});
+
   Product.sync({force: true});
+
+  Reciept.sync({force: true});
+
   res.send({"message": "insert successfully"});
+});
+
+router.get('/insertProduct', function(req, res){
+  var fs = require('fs'),
+      async = require('async'),
+      csv = require('csv');
+  var lineReader = require('line-reader');
+  var stream = require('stream');
+  var inserter = async.cargo(function (tasks, inserterCallback) {
+    Product.sync().then(() => Product.bulkCreate(tasks)
+        .then(function () {
+          inserterCallback();
+        }));
+  }, 1000);
+
+  lineReader.eachLine('./projectRecordsJSON.json', function(line, last) {
+        currentLine = line.toString().replace(/'/g, "\"", "g");
+        jsonRecord = JSON.parse(currentLine);
+        inserter.push({asin: jsonRecord.asin,
+          productName: jsonRecord.title || '',
+          productDescription: jsonRecord.description ? jsonRecord.description : '',
+          group: jsonRecord.categories ? jsonRecord.categories[0][0] : ''
+        });
+      }
+  )
+
+});
+
+router.get('/insertUser', function(req, res){
+  var fs = require('fs'),
+      async = require('async'),
+      csv = require('csv');
+  var lineReader = require('line-reader');
+  var input = fs.createReadStream('./UserData.csv');
+  var parser = csv.parse({delimiter: ',', columns: true});
+
+  inserter = async.cargo(function (tasks, inserterCallback) {
+    User.sync().then(() => User.bulkCreate(tasks)
+        .then(function () {
+          inserterCallback();
+        }));
+  }, 1000);
+
+  parser.on('readable', function () {
+    while (line = parser.read()) {
+      console.log(line)
+      inserter.push(line);
+    }
+  });
+
+  parser.on('end', function (count) {
+    inserter.drain = function () {
+      console.log("END")
+    }
+  });
+
+  input.pipe(parser);
+  res.json({"message":"insert successful"});
 });
 
 
@@ -98,7 +163,7 @@ router.post('/login', function(req, res){
         username: req.body.username,
         password: req.body.password
       }
-    });
+      });
     if (user){
       req.session.regenerate(function(err) {
         req.session.loginUser = user.get('username');
@@ -338,6 +403,107 @@ router.post('/viewProducts', function(req, res){
   });
 });
 
+router.post('/buyProducts', async function(req, res){
+  if (!isLogIn(req)){
+    res.json({"message":"You are not currently logged in"});
+    return;
+  }
+  var products = req.body.products;
+  var username = req.session.loginUser;
+  var result = await check(products);
+  //console.log(result);
+  if (result.length != products.length){
+    res.json({"message": "There are no products that match that criteria"});
+    return;
+  } else {
+    //console.log(result[0][0].dataValues.asin);
+    for (var i = 0; i < products.length; i ++){
+      var asin = result[i][0].dataValues.asin;
+      var productName = result[i][0].dataValues.productName;
+      History.create({
+            username: username,
+            asin: asin,
+            productName: productName
+      });
+    }
+  }
+
+  for (var i = 0; i < products.length; i ++){
+    for (var j = 0; j < products.length; j ++){
+      var asin1 = result[i][0].dataValues.asin;
+      var asin2 = result[j][0].dataValues.asin;
+      if (asin1 != asin2){
+        Reciept.create({
+          one:asin1,
+          two:asin2
+        });
+      }
+    }
+  }
+
+  res.json({"message":"The action was successful"});
+  return;
+});
+
+async function check(products){
+  var result = [];
+  for (var i = 0; i < products.length; i ++){
+    var p = await Product.findAll({
+      where:{
+        asin: products[i].asin
+      }
+    });
+    if (p.length == 0){
+      return result;
+    }
+    result.push(p);
+  }
+  return result;
+}
+
+router.post('/productsPurchased', function(req, res){
+  if (!isLogIn(req)){
+    res.json({"message":"You are not currently logged in"});
+    return;
+  }
+  if (!isAdmin(req)){
+    res.json({"message":"You must be an admin to perform this action"});
+    return;
+  }
+  var username = req.body.username;
+  History.findAll({
+    attributes: ['productName',[Sequelize.fn('COUNT', Sequelize.col('asin')), 'quantity']],
+    where: {
+      username: username
+    },
+    group: "productName"
+  }).then(function(products){
+    if (products.length > 0){
+      res.json({"message": "The action was successful", "products": products});
+    } else {
+      res.json({"message": "There are no users that match that criteria"});
+    }
+  })
+});
+
+router.post('/getRecommendations', function(req, res){
+  if (!isLogIn(req)){
+    res.json({"message":"You are not currently logged in"});
+    return;
+  }
+  var asin = req.body.asin;
+  Reciept.findAll({
+    attributes: [['two', 'asin']],
+    where: {
+      one: asin
+    },
+    group: "two",
+    order: [[Sequelize.fn('COUNT', Sequelize.col('two')), 'DESC']]
+  }).then(function(products){
+    return res.json({"message": "The action was successful", "products":products});
+  });
+});
+
 
 function isLogIn(req){
   var sess = req.session;
@@ -351,5 +517,7 @@ function isAdmin(req){
   var loginUser = sess.loginUser;
   return loginUser == "jadmin";
 }
+
+
 
 module.exports = router;

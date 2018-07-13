@@ -13,13 +13,13 @@ var Product = db.defineModel('product', {
         }
     },
     productName: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         validate: {
             notEmpty: true
         }
     },
     productDescription: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         validate: {
             notEmpty: true
         }
