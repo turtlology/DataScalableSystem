@@ -12,6 +12,8 @@ var FileStore = require('session-file-store')(session);
 
 var app = express();
 
+app.use(cookieParser());
+
 var identityKey = 'skey';
 
 app.use(session({

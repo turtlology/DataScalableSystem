@@ -1,10 +1,10 @@
 
 const Sequelize = require('sequelize');
 
-    //const sequelize = new Sequelize('DataScalableSystem', 'root', 'root1234', {
-    const sequelize = new Sequelize('DataScalableSystem', 'root', 'root', {
-    //host: 'ediss.cyfeqjhd9zxr.us-east-1.rds.amazonaws.com',
-    host: 'localhost',
+    const sequelize = new Sequelize('DataScalableSystem', 'root', 'root1234', {
+    //const sequelize = new Sequelize('DataScalableSystem', 'root', 'root', {
+    host: 'ediss.cyfeqjhd9zxr.us-east-1.rds.amazonaws.com',
+    //host: 'localhost',
     dialect: 'mysql',
     define: {
         charset: 'utf8',

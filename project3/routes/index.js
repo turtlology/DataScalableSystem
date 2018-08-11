@@ -8,22 +8,7 @@ const Op = Sequelize.Op;
 var identityKey = 'skey';
 var History = require('../Module/History');
 var Reciept = require('../Module/Reciept');
-
-//const Sequelize = require('sequelize');
-//const sequelize = new Sequelize('DataScalableSystem', 'root', 'root', {
-//  host: 'localhost',
-//  dialect: 'mysql',
-//
-//  pool: {
-//    max: 5,
-//    min: 0,
-//    acquire: 10000,
-//    idle: 10000,
-//    evict: 10000
-//  },
-//
-//  operatorsAliases: false
-//});
+var cookie = require('cookie');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -154,7 +139,6 @@ router.get('/insertUser', function(req, res){
 
 router.post('/login', function(req, res){
   if (req.body){
-    var sess = req.session;
 
     //noinspection JSUnresolvedFunction
     (async () => {
@@ -165,11 +149,13 @@ router.post('/login', function(req, res){
       }
       });
     if (user){
-      req.session.regenerate(function(err) {
-        req.session.loginUser = user.get('username');
-        res.json({"message":"Welcome "+user.get('fname')})
-      });
-      console.log(user.get("fname"));
+      res.cookie('loginUser', user.get('username'), { maxAge: 15 * 60 * 1000});
+      res.json({"message":"Welcome "+user.get('fname')});
+      //req.session.regenerate(function(err) {
+      //  req.session.loginUser = user.get('username');
+      //  res.json({"message":"Welcome "+user.get('fname')})
+      //});
+      //console.log(user.get("fname"));
     } else {
       res.json({"message":"There seems to be an issue with the username/password combination that you entered"});
     }
@@ -195,7 +181,8 @@ router.post('/updateInfo', function(req, res){
     res.json({"message":"You are not currently logged in"});
     return;
   } else {
-    var username = req.session.loginUser;
+    //var username = req.session.loginUser;
+    var username = cookie.parse(req.headers.cookie).loginUser;
     User.find({
       where: {
         username: req.body.username,
@@ -409,7 +396,7 @@ router.post('/buyProducts', async function(req, res){
     return;
   }
   var products = req.body.products;
-  var username = req.session.loginUser;
+  var username = cookie.parse(req.headers.cookie).loginUser;
   var result = await check(products);
   //console.log(result);
   if (result.length != products.length){
@@ -514,15 +501,15 @@ router.post('/getRecommendations', function(req, res){
 
 
 function isLogIn(req){
-  var sess = req.session;
-  var loginUser = sess.loginUser;
+  var cookies = req.headers.cookie;
+  var loginUser = cookie.parse(cookies).loginUser;
   var isLogined = !!loginUser;
   return isLogined;
 }
 
 function isAdmin(req){
-  var sess = req.session;
-  var loginUser = sess.loginUser;
+  var cookies = req.headers.cookie;
+  var loginUser = cookie.parse(cookies).loginUser;
   return loginUser == "jadmin";
 }
 
